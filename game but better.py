@@ -27,6 +27,7 @@ font_temperature = pygame.font.SysFont('Times New Roman', 30)
 
 hot = True
 cold = False
+debug = True
 
 
 
@@ -49,6 +50,7 @@ colors = white
 #load images
 sun_img = pygame.image.load('img/sun.png')
 bg_img = pygame.image.load('img/sky.png')
+bg_img_cold = pygame.image.load('img/skycold.png')
 restart_img = pygame.image.load('img/restart_btn.png')
 start_img = pygame.image.load('img/start_btn.png')
 exit_img = pygame.image.load('img/exit_btn.png')
@@ -143,7 +145,7 @@ class Player():
                             self.image = self.images_right[self.index]
                     if self.direction == -1:
                             self.image = self.images_left[self.index]
-
+ 
             #animation
             if self.counter > walk_cooldown:
                 self.counter = 0
@@ -348,6 +350,7 @@ class Water(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        
 class Ice(pygame.sprite.Sprite):
      def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -399,7 +402,11 @@ while run:
         run = False
     
     if main_menu == True:
-        draw_text('THE GITTER', font, blue, (screen_width // 2) - 240, screen_height // 2 - 100)
+        draw_text('THE GITTER', font, black, (screen_width - 377), screen_height - 347)
+        draw_text('THE GITTER', font, black, (screen_width - 383), screen_height - 347)
+        draw_text('THE GITTER', font, black, (screen_width - 377), screen_height - 353)
+        draw_text('THE GITTER', font, black, (screen_width - 383), screen_height - 353)
+        draw_text('THE GITTER', font, (0, 0, 255), (screen_width - 380), screen_height - 350)
         if exit_button.draw():
             run = False
         if start_button.draw():
@@ -417,9 +424,11 @@ while run:
                     cold = True
                     hot = False
                     colors = blue
+                    bg_img = pygame.transform.scale(bg_img_cold, (int((1000//2.08333333333)),int(1000//2.08333333333)))
                 else:
                     hot = True
                     cold = False
+                    bg_img = pygame.transform.scale(bg_img, (int((1000//2.08333333333)),int(1000//2.08333333333)))
                     colors = red
                 world = World(world_data)
                 world.draw()
@@ -436,13 +445,6 @@ while run:
         coldlava_group.draw(screen)
         
         game_over = player.update(game_over)
-
-        if hot:
-            pass
-        elif cold:
-            pass
-        else:
-            pass
 
         #if player died
         if game_over == -1:
