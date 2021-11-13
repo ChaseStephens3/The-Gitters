@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 import pickle
 from os import path
-#from sensor import *
+from sensor import *
 import time
 #I had to comment line 5 and 415 because if you don't have the probe, the game gets a stroke
 pygame.init()
@@ -119,7 +119,7 @@ class Player():
     def update(self, game_over):
         dx = 0
         dy = 0
-        walk_cooldown = 5
+        walk_cooldown = 2
 
         if game_over == 0:
             #get keypresses
@@ -222,7 +222,7 @@ class Player():
             self.rect.y -= 5
 
         screen.blit(self.image, self.rect)
-        #pygame.draw.rect(screen, (255,255,255), self.rect, 2)
+        pygame.draw.rect(screen, (255,255,255), self.rect, 2)
         return game_over
 
     def reset(self, x, y):
@@ -230,7 +230,7 @@ class Player():
         self.images_left = []
         self.index = 0
         self.counter = 0
-        for num in range(1, 5):
+        for num in range(1, 11):
                 img_right = pygame.image.load('img/guy{}.png'.format(num))
                 img_right = pygame.transform.scale(img_right, (int(19.2), int(38.4)))
                 img_left = pygame.transform.flip(img_right, True, False)
@@ -395,8 +395,13 @@ while run:
 
     clock.tick(fps)
     key = pygame.key.get_pressed()
+    if hot:
+        background_img = pygame.transform.scale(bg_img, (int((1000//2.08333333333)),int(1000//2.08333333333)))
+        
+    elif cold:
+        background_img = pygame.transform.scale(bg_img_cold, (int((1000//2.08333333333)),int(1000//2.08333333333)))
 
-    screen.blit(bg_img, (0, 0))
+    screen.blit(background_img, (0, 0))
     screen.blit(sun_img, (100, 100))
     if key[pygame.K_ESCAPE]:
         run = False
@@ -414,26 +419,33 @@ while run:
     else:
         
         world.draw()
-        if game_over == 0:
+        if game_over == 0: 
             if key[pygame.K_LSHIFT]:
                 if path.exists('level{}_data'.format(level)):
                     pickle_in = open('level{}_data'.format(level), 'rb')
                     world_data = pickle.load(pickle_in)
-                #temperature = round(read_temp(),2)
+                temperature = round(read_temp(),2)
                 if temperature < 75:
                     cold = True
                     hot = False
                     colors = blue
-                    bg_img = pygame.transform.scale(bg_img_cold, (int((1000//2.08333333333)),int(1000//2.08333333333)))
+                    background_img = pygame.transform.scale(bg_img_cold, (int((1000//2.08333333333)),int(1000//2.08333333333)))
                 else:
                     hot = True
                     cold = False
-                    bg_img = pygame.transform.scale(bg_img, (int((1000//2.08333333333)),int(1000//2.08333333333)))
+                    background_img = pygame.transform.scale(bg_img, (int((1000//2.08333333333)),int(1000//2.08333333333)))
                     colors = red
                 world = World(world_data)
                 world.draw()
             if temperature == 0:
+                colors = white
                 draw_text('TEMP NOT SET', font_temperature, colors, tile_size -10,10)
+            elif temperature == 1000:
+                hot = True
+                cold = False
+                draw_text('TEMP NOT SET', font_temperature, colors, tile_size -10,10)
+                
+                
             else:
                 draw_text(str(temperature)+'°F', font_temperature, colors, tile_size - 10,10)
             
@@ -463,13 +475,19 @@ while run:
                 world = reset_level(level)
                 game_over = 0
             else:
+                hot = True
+                cold = False
+                temperature = 1000
                 draw_text('YOU WIN! ', font, blue, (screen_width // 2) - 140, screen_height // 2)
                 #restart game
                 if restart_button.draw():
+                    hot = True
+                    cold = False
                     level = 0
                     world_data = []
                     world = reset_level(level)
                     game_over = 0
+                    
 
         
         
